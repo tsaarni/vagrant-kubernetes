@@ -1,13 +1,23 @@
 #!/bin/sh -ex
+#
+# Install kubernetes with containerd
+#
+# References
+# * https://kubernetes.io/docs/setup/independent/install-kubeadm/
+# * https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/
+#
 
 # configure repos
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
 echo deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable > /etc/apt/sources.list.d/docker.list
 
-curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+curl -fsSl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
 echo "deb http://apt.kubernetes.io/ kubernetes-$(lsb_release -cs) main" > /etc/apt/sources.list.d/kubernetes.list
 
 apt update
+
+# install dependencies
+apt install -y conntrack
 
 # install docker
 docker_version=$(apt-cache madison docker-ce | grep 17.03 | head -1 | awk '{print $3}')
@@ -17,6 +27,7 @@ apt install -y docker-ce=$docker_version
 apt install -y kubeadm kubelet kubernetes-cni
 
 # intialize kubernetes master
+#   --apiserver-cert-extra-sans is needed since we want to use kubectl with virtualbox NAT port forward
 kubeadm init --apiserver-cert-extra-sans 127.0.0.1
 
 # install CNI networking plugin
