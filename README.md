@@ -2,59 +2,73 @@
 # Minimal installation of Kubernetes in Vagrant box
 
 This repository contains minimal Vagrant script to install and run
-single-node Kubernetes "cluster" locally e.g. on a Windows laptop.
+single-node Kubernetes "cluster" locally e.g. on a Windows laptop on a
+virtual machine.
 
 
 ## Prerequisites
 
 Download [Vagrant](https://www.vagrantup.com/downloads.html),
-[VirtualBox](https://www.virtualbox.org/wiki/Downloads) and
-[kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
+[VirtualBox](https://www.virtualbox.org/wiki/Downloads).
 
-There are two alternative container runtimes that can be chosen by
-editing [Vagrantfile](Vagrantfile):
+Optionally you may download also
+[kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/), 
+[docker](https://www.docker.com/community-edition#/download) and
+[helm](https://github.com/kubernetes/helm/releases) for your
+host OS. These tools are also available inside the VM.
 
-* [install-kubernetes-with-docker.sh](install-kubernetes-with-docker.sh)
-* [install-kubernetes-with-containerd.sh](install-kubernetes-with-containerd.sh)
 
+## Starting Kubernetes Vagrant box
 
-## Running
-
-Run following to start the Vagrant box:
+Run following to start the VM:
 
     vagrant up
-
 
 The command will automatically download Ubuntu 16.04 image, launch it,
 and then install Kubernetes.
 
-When the initial installation step is completed, poll the status of the
-cluster until status field is `Ready`:
+You can either connect to the VM to use tools such as `kubectl`, `helm` and
+`docker`:
 
-    kubectl --kubeconfig=admin.conf get nodes
+    vagrant ssh
 
 
-The installation can take couple of minutes to finalize.  While the
-installation is still ongoing the master node status is `NotReady`.
+or alternatively you can use the tools from host OS by setting following environment
+variables (Linux and MacOS):
 
-Finally, test that you can launch a pod by running:
+    export KUBECONFIG=$PWD/admin.conf
+    export DOCKER_HOST=tcp://localhost:2375
 
-    kubectl --kubeconfig=admin.conf run --rm -it --image alpine myalpinepod ash
+
+To test that you can launch a pod running:
+
+    kubectl run --rm -it --image alpine myalpinepod ash
 
 
 You should get ash shell prompt running in a container.
+
+To remove the VM run following on host OS:
+
+    vagrant destroy
+
+
+## Additional features
+
+Vagrantfile executes [install-additions.sh](install-additions.sh) which
+installs following optional components:
+
+* persistent volume support (minikube hostpath-storage provisioner)
+* helm
 
 Note that the VM is configured with minimal amount of RAM so you need
 to increase the allocated memory in `Vagrantfile` if running anything
 non-trivial.
 
-To remove the VM run:
 
-    vagrant destroy
+## Alternative container runtimes
 
+There are two alternative container runtimes that can be chosen by
+editing [Vagrantfile](Vagrantfile).  The default is Docker.
 
-## Troubleshooting
-
-You can connect to host VM by running:
-
-    vagrant ssh
+* [install-kubernetes-with-docker.sh](install-kubernetes-with-docker.sh)
+* [install-kubernetes-with-containerd.sh](install-kubernetes-with-containerd.sh)

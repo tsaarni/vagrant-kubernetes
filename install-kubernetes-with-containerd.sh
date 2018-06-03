@@ -1,4 +1,4 @@
-#!/bin/sh -ex
+#!/bin/bash -ex
 #
 # Install kubernetes with containerd
 #
@@ -13,10 +13,10 @@
 curl -fsSl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
 echo "deb http://apt.kubernetes.io/ kubernetes-$(lsb_release -cs) main" > /etc/apt/sources.list.d/kubernetes.list
 
-apt update
+apt-get update
 
 # install dependencies
-apt install -y conntrack
+apt-get install -y conntrack
 
 # enable ip forwarding
 sysctl -w net.ipv4.ip_forward=1
@@ -31,7 +31,7 @@ systemctl enable containerd
 systemctl start containerd
 
 # install kubernetes
-apt install -y kubeadm kubelet kubernetes-cni
+apt-get install -y kubeadm kubelet kubernetes-cni
 
 # configure kubelet to be used with containerd
 cat > /etc/systemd/system/kubelet.service.d/0-containerd.conf <<EOF
@@ -43,16 +43,33 @@ systemctl daemon-reload
 # intialize kubernetes master
 #   --skip-preflight-checks is needed since kubeadm checks for existence of docker
 #   --apiserver-cert-extra-sans is needed since we want to use kubectl with virtualbox NAT port forward
-kubeadm init --skip-preflight-checks --apiserver-cert-extra-sans 127.0.0.1
+kubeadm init --ignore-preflight-errors=all --apiserver-cert-extra-sans 127.0.0.1
+
+export KUBECONFIG=/etc/kubernetes/admin.conf
 
 # install CNI networking plugin
-kubectl --kubeconfig=/etc/kubernetes/admin.conf apply -f https://docs.projectcalico.org/v3.0/getting-started/kubernetes/installation/hosted/kubeadm/1.7/calico.yaml
+kubectl apply -f https://docs.projectcalico.org/v3.0/getting-started/kubernetes/installation/hosted/kubeadm/1.7/calico.yaml
 
 # allow scheduling of pods on master node
-kubectl --kubeconfig=/etc/kubernetes/admin.conf taint nodes --all node-role.kubernetes.io/master-
+kubectl taint nodes --all node-role.kubernetes.io/master-
 
-# make kubernetes admin.conf available for host machine
+# make kubernetes admin.conf available for host machine and for vagrant-user
 cp /etc/kubernetes/admin.conf /vagrant
+mkdir ~vagrant/.kube
+cp /etc/kubernetes/admin.conf ~vagrant/.kube/config
+chown -R vagrant:vagrant ~vagrant/.kube
 
 # replace internal kubernetes api server address with localhost, so it can be accessed via virtualbox port forward
 sed -i 's!server: .*!server: https://127.0.0.1:6443!g' /vagrant/admin.conf
+
+# wait for the node to come up
+set +x  # disable bash trace
+while true; do
+    status=$(kubectl --kubeconfig=/etc/kubernetes/admin.conf get nodes -o jsonpath='{.items[*].status.conditions[?($.status == "True")].status}')
+    if [[ $status == "True" ]]; then
+        break
+    fi
+    echo "Running 'kubectl get nodes' and waiting for the nodes to come up..."
+    sleep 3
+done
+set -x
