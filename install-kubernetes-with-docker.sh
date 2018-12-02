@@ -1,6 +1,6 @@
 #!/bin/bash -ex
 #
-# Install kubernetes with containerd
+# Install kubernetes with docker
 #
 # References
 # * https://kubernetes.io/docs/setup/independent/install-kubeadm/
@@ -32,14 +32,17 @@ docker_version=$(apt-cache madison docker-ce | grep 17.03 | head -1 | awk '{prin
 apt-get install -y docker-ce=$docker_version
 
 # install kubernetes
-apt-get install -y kubeadm kubelet kubernetes-cni
+kubernetes_version=$(apt-cache madison kubelet | grep 1.12 | head -1 | awk '{print $3}')
+kubernetes_cni_version=$(apt-cache madison kubernetes-cni | grep 0.6 | head -1 | awk '{print $3}')
+apt-get install -y kubeadm=$kubernetes_version kubelet=$kubernetes_version kubectl=$kubernetes_version kubernetes-cni=$kubernetes_cni_version
 
 # intialize kubernetes master
 #   --apiserver-cert-extra-sans is needed since we want to use kubectl with virtualbox NAT port forward
-kubeadm init --apiserver-cert-extra-sans 127.0.0.1
+kubeadm init --apiserver-cert-extra-sans 127.0.0.1 --pod-network-cidr 192.168.0.0/16
 
 # install CNI networking plugin
-kubectl --kubeconfig=/etc/kubernetes/admin.conf apply -f https://docs.projectcalico.org/v3.0/getting-started/kubernetes/installation/hosted/kubeadm/1.7/calico.yaml
+kubectl --kubeconfig=/etc/kubernetes/admin.conf apply -f https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/rbac-kdd.yaml
+kubectl --kubeconfig=/etc/kubernetes/admin.conf apply -f https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/kubernetes-datastore/calico-networking/1.7/calico.yaml
 
 # allow scheduling of pods on master node
 kubectl --kubeconfig=/etc/kubernetes/admin.conf taint nodes --all node-role.kubernetes.io/master-

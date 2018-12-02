@@ -31,7 +31,9 @@ systemctl enable containerd
 systemctl start containerd
 
 # install kubernetes
-apt-get install -y kubeadm kubelet kubernetes-cni
+kubernetes_version=$(apt-cache madison kubelet | grep 1.12 | head -1 | awk '{print $3}')
+kubernetes_cni_version=$(apt-cache madison kubernetes-cni | grep 0.6 | head -1 | awk '{print $3}')
+apt-get install -y kubeadm=$kubernetes_version kubelet=$kubernetes_version kubectl=$kubernetes_version kubernetes-cni=$kubernetes_cni_version
 
 # configure kubelet to be used with containerd
 cat > /etc/systemd/system/kubelet.service.d/0-containerd.conf <<EOF
