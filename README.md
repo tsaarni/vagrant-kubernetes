@@ -15,7 +15,7 @@ Optionally you may download also
 [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/), 
 [docker](https://www.docker.com/community-edition#/download) and
 [helm](https://github.com/kubernetes/helm/releases) for your
-host OS. These tools are also available inside the VM.
+host OS. These tools are also installed to the VM.
 
 
 ## Starting Kubernetes Vagrant box
@@ -70,5 +70,5 @@ non-trivial.
 There are two alternative container runtimes that can be chosen by
 editing [Vagrantfile](Vagrantfile).  The default is Docker.
 
-* [install-kubernetes-with-docker.sh](install-kubernetes-with-docker.sh)
-* [install-kubernetes-with-containerd.sh](install-kubernetes-with-containerd.sh)
+* [install-kubernetes-and-docker.sh](provisioning/install-kubernetes-and-docker.sh)
+* [install-kubernetes-and-containerd.sh](provisioning/install-kubernetes-and-containerd.sh)

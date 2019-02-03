@@ -10,8 +10,8 @@ Vagrant.configure("2") do |config|
     v.cpus = 2       # 2 vCPUs is the minimum number of CPUs for master
   end
 
-  config.vm.provision "shell", path: "install-kubernetes-with-docker.sh"
-  #config.vm.provision "shell", path: "install-kubernetes-with-containerd.sh"
-  config.vm.provision "shell", path: "install-additions.sh"
+  config.vm.provision "shell", path: "provisioning/install-kubernetes-and-docker.sh"
+  #config.vm.provision "shell", path: "provisioning/install-kubernetes-and-containerd.sh"
+  config.vm.provision "shell", path: "provisioning/install-additions.sh"
 
 end
