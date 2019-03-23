@@ -28,7 +28,7 @@ ExecStart=/usr/bin/dockerd -H fd:// -H tcp://0.0.0.0:2375
 EOF
 
 # install docker
-docker_version=$(apt-cache madison docker-ce | grep 17.03 | head -1 | awk '{print $3}')
+docker_version=$(apt-cache madison docker-ce | grep 18.09 | head -1 | awk '{print $3}')
 apt-get install -y docker-ce=$docker_version
 
 # install kubernetes
