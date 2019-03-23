@@ -2,17 +2,15 @@
 
 export KUBECONFIG=/etc/kubernetes/admin.conf
 
-# install minikube hostpath storage provisioner for persistent volumes
-#    - Note: the storage provisioner uses /tmp/hostpath-provisioner/ 
-#      directory in the VM to provide persistent volume storage.
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/minikube/master/deploy/addons/storage-provisioner/storage-provisioner.yaml
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/minikube/master/deploy/addons/storageclass/storageclass.yaml
-
+# install storage provisioner
+#  - https://github.com/rancher/local-path-provisioner
+mkdir -p --mode=750 /opt/local-path-provisioner
+kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
+kubectl patch storageclass local-path -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 
 
 # install helm
 #  - https://github.com/helm/helm/releases
-
 curl -L -s https://storage.googleapis.com/kubernetes-helm/helm-v2.13.1-linux-amd64.tar.gz -o helm.tar.gz
 tar zxf helm.tar.gz
 cp -a linux-amd64/helm /usr/local/bin/helm
@@ -25,7 +23,7 @@ metadata:
   name: helm
   namespace: kube-system
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: helm

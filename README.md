@@ -57,7 +57,7 @@ To remove the VM run following on host OS:
 Vagrantfile executes [install-additions.sh](install-additions.sh) which
 installs following optional components:
 
-* persistent volume support (minikube hostpath-storage provisioner)
+* persistent volume support
 * helm
 
 Note that the VM is configured with minimal amount of RAM so you need
