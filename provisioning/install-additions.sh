@@ -9,8 +9,11 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/minikube/master/de
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/minikube/master/deploy/addons/storageclass/storageclass.yaml
 
 
+
 # install helm
-curl -L -s https://storage.googleapis.com/kubernetes-helm/helm-v2.11.0-linux-amd64.tar.gz -o helm.tar.gz
+#  - https://github.com/helm/helm/releases
+
+curl -L -s https://storage.googleapis.com/kubernetes-helm/helm-v2.13.1-linux-amd64.tar.gz -o helm.tar.gz
 tar zxf helm.tar.gz
 cp -a linux-amd64/helm /usr/local/bin/helm
 
@@ -37,7 +40,7 @@ subjects:
 EOF
 
 # install tiller
-helm init --wait --service-account helm
+helm init --wait --service-account helm --override spec.template.spec.containers[0].args='{--listen=localhost:44134}'
 
 # add bash completions for vagrant users
 echo "source <(helm completion bash)" >> ~vagrant/.bashrc
