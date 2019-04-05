@@ -37,7 +37,8 @@ subjects:
     namespace: kube-system
 EOF
 
-# install tiller
+# install tiller,
+# bind only to localhost in order not to expose GRPC endpoint within cluster network
 helm init --wait --service-account helm --override spec.template.spec.containers[0].args='{--listen=localhost:44134}'
 
 # add bash completions for vagrant users

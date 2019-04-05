@@ -12,7 +12,7 @@ Download [Vagrant](https://www.vagrantup.com/downloads.html),
 [VirtualBox](https://www.virtualbox.org/wiki/Downloads).
 
 Optionally you may download also
-[kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/), 
+[kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/),
 [docker](https://www.docker.com/community-edition#/download) and
 [helm](https://github.com/kubernetes/helm/releases) for your
 host OS. These tools are also installed to the VM.
@@ -59,6 +59,11 @@ installs following optional components:
 
 * persistent volume support
 * helm
+
+[external-exposure.sh](provisioning/external-exposure.sh) provides support for:
+
+* allocate external IP for Services of type LoadBalancer using MetalLB
+* publish .local host name for external IPs with mDNS using [external-dns and Avahi](https://github.com/tsaarni/external-dns-hosts-provider-for-mdns)
 
 Note that the VM is configured with minimal amount of RAM so you need
 to increase the allocated memory in `Vagrantfile` if running anything
