@@ -36,6 +36,9 @@ You can either connect to the VM to use tools such as `kubectl`, `helm` and
 or alternatively you can use the tools from host OS by setting following environment
 variables (Linux and MacOS):
 
+    vagrant ssh --command "cat .kube/config" > admin.conf
+    sed -i 's!server: .*!server: https://127.0.0.1:6443!g' admin.conf
+
     export KUBECONFIG=$PWD/admin.conf
     export DOCKER_HOST=tcp://localhost:2375
 

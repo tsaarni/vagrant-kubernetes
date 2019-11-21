@@ -5,7 +5,7 @@ export KUBECONFIG=/etc/kubernetes/admin.conf
 # install storage provisioner
 #  - https://github.com/rancher/local-path-provisioner
 mkdir -p --mode=750 /opt/local-path-provisioner
-kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
+kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/v0.0.11/deploy/local-path-storage.yaml
 kubectl patch storageclass local-path -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 
 

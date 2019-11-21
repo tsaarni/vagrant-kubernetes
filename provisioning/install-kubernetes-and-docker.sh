@@ -19,6 +19,10 @@ apt-get update
 # install dependencies
 apt-get install -y conntrack
 
+# disable swap
+swapoff -a
+sed -i '/ swap / s/^/#/' /etc/fstab
+
 # enable docker remote access outside the VM
 mkdir -p /etc/systemd/system/docker.service.d
 cat >/etc/systemd/system/docker.service.d/override.conf <<EOF
@@ -47,8 +51,7 @@ kubectl --kubeconfig=/etc/kubernetes/admin.conf apply -f https://docs.projectcal
 # since we only have one node, allow scheduling of pods on master node
 kubectl --kubeconfig=/etc/kubernetes/admin.conf taint nodes --all node-role.kubernetes.io/master-
 
-# make kubernetes admin.conf available for host machine and for vagrant-user
-cp /etc/kubernetes/admin.conf /vagrant
+# make kubernetes admin.conf available for vagrant-user
 mkdir ~vagrant/.kube
 cp /etc/kubernetes/admin.conf ~vagrant/.kube/config
 chown -R vagrant:vagrant ~vagrant/.kube
@@ -58,9 +61,6 @@ echo "source <(kubectl completion bash)" >> ~vagrant/.bashrc
 
 # add vagrant to docker group to allow running docker without sudo
 usermod -a -G docker vagrant
-
-# replace internal kubernetes api server address with localhost, so it can be accessed also outside the VM via virtualbox port forward
-sed -i 's!server: .*!server: https://127.0.0.1:6443!g' /vagrant/admin.conf
 
 # wait for the node to come up
 set +x  # disable bash trace
