@@ -5,6 +5,7 @@
 # References
 # * https://kubernetes.io/docs/setup/independent/install-kubeadm/
 # * https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/
+# * https://kubernetes.io/docs/setup/production-environment/container-runtimes/
 #
 
 # configure repos
@@ -32,11 +33,30 @@ ExecStart=/usr/bin/dockerd -H fd:// -H tcp://0.0.0.0:2375
 EOF
 
 # install docker
-docker_version=$(apt-cache madison docker-ce | grep 18.09 | head -1 | awk '{print $3}')
-apt-get install -y docker-ce=$docker_version
+apt-get update && apt-get install -y \
+  containerd.io=1.2.13-1 \
+  docker-ce=5:19.03.8~3-0~ubuntu-$(lsb_release -cs) \
+  docker-ce-cli=5:19.03.8~3-0~ubuntu-$(lsb_release -cs)
+
+cat > /etc/docker/daemon.json <<EOF
+{
+  "exec-opts": ["native.cgroupdriver=systemd"],
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "100m"
+  },
+  "storage-driver": "overlay2"
+}
+EOF
+
+mkdir -p /etc/systemd/system/docker.service.d
+
+# Restart docker.
+systemctl daemon-reload
+systemctl restart docker
 
 # install kubernetes
-kubernetes_version=1.14
+kubernetes_version=1.18
 kubernetes_deb_version=$(apt-cache madison kubelet | grep $kubernetes_version | head -1 | awk '{print $3}')
 apt-get install -y kubeadm=$kubernetes_deb_version kubelet=$kubernetes_deb_version kubectl=$kubernetes_deb_version
 
@@ -45,8 +65,7 @@ apt-get install -y kubeadm=$kubernetes_deb_version kubelet=$kubernetes_deb_versi
 kubeadm init --config /vagrant/configs/kubeadm-config.yaml
 
 # install CNI networking plugin
-kubectl --kubeconfig=/etc/kubernetes/admin.conf apply -f https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/rbac-kdd.yaml
-kubectl --kubeconfig=/etc/kubernetes/admin.conf apply -f https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/kubernetes-datastore/calico-networking/1.7/calico.yaml
+kubectl --kubeconfig=/etc/kubernetes/admin.conf apply -f https://docs.projectcalico.org/manifests/calico.yaml
 
 # since we only have one node, allow scheduling of pods on master node
 kubectl --kubeconfig=/etc/kubernetes/admin.conf taint nodes --all node-role.kubernetes.io/master-
