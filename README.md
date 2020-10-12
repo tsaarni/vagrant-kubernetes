@@ -63,7 +63,7 @@ installs following optional components:
 * persistent volume support
 * helm
 
-[external-exposure.sh](provisioning/external-exposure.sh) provides support for:
+[external-exposure.sh](provisioning/external-exposure.sh) is not executed by default, but it provides support for:
 
 * allocate external IP for Services of type LoadBalancer using MetalLB
 * publish .local host name for external IPs with mDNS using [external-dns and Avahi](https://github.com/tsaarni/external-dns-hosts-provider-for-mdns)

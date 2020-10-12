@@ -33,10 +33,10 @@ ExecStart=/usr/bin/dockerd -H fd:// -H tcp://0.0.0.0:2375
 EOF
 
 # install docker
-apt-get update && apt-get install -y \
-  containerd.io=1.2.13-1 \
-  docker-ce=5:19.03.8~3-0~ubuntu-$(lsb_release -cs) \
-  docker-ce-cli=5:19.03.8~3-0~ubuntu-$(lsb_release -cs)
+sudo apt-get update && sudo apt-get install -y \
+  containerd.io=1.2.13-2 \
+  docker-ce=5:19.03.11~3-0~ubuntu-$(lsb_release -cs) \
+  docker-ce-cli=5:19.03.11~3-0~ubuntu-$(lsb_release -cs)
 
 cat > /etc/docker/daemon.json <<EOF
 {
@@ -56,12 +56,11 @@ systemctl daemon-reload
 systemctl restart docker
 
 # install kubernetes
-kubernetes_version=1.18
+kubernetes_version=1.19
 kubernetes_deb_version=$(apt-cache madison kubelet | grep $kubernetes_version | head -1 | awk '{print $3}')
 apt-get install -y kubeadm=$kubernetes_deb_version kubelet=$kubernetes_deb_version kubectl=$kubernetes_deb_version
 
 # intialize kubernetes master
-#   Note: use command "kubeadm config print-default" to print all config file parameters
 kubeadm init --config /vagrant/configs/kubeadm-config.yaml
 
 # install CNI networking plugin

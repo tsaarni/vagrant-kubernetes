@@ -2,7 +2,9 @@
 
 Vagrant.configure("2") do |config|
 
-  config.vm.box = "generic/ubuntu1604"
+  # bento project https://github.com/chef/bento
+  # publishes images with working vbox guest additions
+  config.vm.box = "bento/ubuntu-16.04"
 
   config.vm.network "forwarded_port", guest: 6443, host: 6443, host_ip: "127.0.0.1" # kubernetes
   config.vm.network "forwarded_port", guest: 2375, host: 2375, host_ip: "127.0.0.1" # docker
@@ -17,11 +19,11 @@ Vagrant.configure("2") do |config|
 
   # for qemu
   # export VAGRANT_DEFAULT_PROVIDER=libvirt
-  config.vm.provider "libvirt" do |v|
-    v.memory = 2048
-    v.cpus = 2
-    config.vm.synced_folder './', '/vagrant', type: '9p', disabled: false
-  end
+  #config.vm.provider "libvirt" do |v|
+  #  v.memory = 2048
+  #  v.cpus = 2
+  #  config.vm.synced_folder './', '/vagrant', type: '9p', disabled: false
+  #end
 
 
   config.vm.provision "shell", path: "provisioning/install-kubernetes-and-docker.sh"
